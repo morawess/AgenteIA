@@ -1,0 +1,53 @@
+{
+    "nombre": "Gandalf",
+    "clase": "mago",
+    "nivel": 1,
+    "trasfondo": "",
+    "jugador": "",
+    "especie": "Humano (alternativo)",
+    "alineamiento": "Neutral bueno",
+    "atributos": {
+        "fuerza": 0,
+        "destreza": 8,
+        "constitucion": 0,
+        "inteligencia": 17,
+        "sabiduria": 13,
+        "carisma": 14
+    },
+    "combate": {
+        "ca": 13,
+        "velocidad": 0,
+        "hp_max": 6
+    },
+    "habilidades": {
+        "acrobacias": 1,
+        "arcanos": 3,
+        "atletismo": 0,
+        "engañar": 2,
+        "historia": 5,
+        "interpretacion": 2,
+        "intimidar": 2,
+        "investigacion": 3,
+        "juego_de_manos": -1,
+        "medicina": 1,
+        "naturaleza": 3,
+        "percepcion": 1,
+        "perspicacia": 1,
+        "persuasion": 2,
+        "religion": 3,
+        "sigilo": -1,
+        "supervivencia": 3,
+        "trato_animales": 3
+    },
+    "competencias": [
+        "Ballesta ligera, Bastón, Daga, Dardo,",
+        "Herramientas de artesano, Honda, Vehículo",
+        "(terrestre)"
+    ],
+    "ataques": [],
+    "rasgos": [],
+    "rasgos_personalidad": "Agradable, curioso, sabio",
+    "ideales": "",
+    "vinculos": "",
+    "historia": ""
+}
