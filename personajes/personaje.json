@@ -17,7 +17,8 @@
     "combate": {
         "ca": 13,
         "velocidad": 0,
-        "hp_max": 6
+        "hp_max": 6,
+        "hp_actual": 3
     },
     "habilidades": {
         "acrobacias": 1,
