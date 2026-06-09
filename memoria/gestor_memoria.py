@@ -95,7 +95,6 @@ def borrar_memoria_interna_chat(sesion: dict) -> None:
         sesion["historial"] = []
 
 
-
 def listar_sesiones():
 
     inicializar_memoria()

@@ -5,12 +5,12 @@ from google import genai
 from config import client
 from prompts import SYSTEM_PROMPT
 from dados import tirar_dados as tirar_dados_func
-from personajes.personaje import (
+from personajes.gestor_personaje import (
     cargar_personaje,
     actualizar_personaje as actualizar_personaje_func,
 )
 
-from memoria.memoria import (
+from memoria.gestor_memoria import (
     inicializar_memoria,
     crear_sesion,
     listar_sesiones,
@@ -19,6 +19,7 @@ from memoria.memoria import (
     guardar_sesion,
     vaciar_historial_sesion,
 )
+
 
 
 

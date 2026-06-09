@@ -4,11 +4,11 @@
     "historial": [
         {
             "rol": "user",
-            "contenido": "hola como estás?"
+            "contenido": "Hola, soy Gandalf dime que hechizos tengo"
         },
         {
             "rol": "assistant",
-            "contenido": "Soy un Dungeon Master especializado en Dungeons & Dragons y solo puedo ayudar con aventuras relacionadas con este universo.\n\n¿Qué tipo de aventura te gustaría emprender hoy? ¿Prefieres una búsqueda de tesoros en ruinas antiguas, un misterio que resolver en una ciudad bulliciosa, o quizás una épica batalla contra un mal ancestral?"
+            "contenido": "¡Saludos, Gandalf! Según tus conocimientos arcanos, posees los siguientes hechizos:\n\n*   **Armadura de Mago:** Un hechizo de Abjuración de nivel 1 que te permite otorgar una CA de 13 + tu modificador por Destreza a una criatura voluntaria sin armadura durante 8 horas. Necesita componentes verbales, somáticos y materiales (un trozo de cuero curado).\n\n*   **Luz:** Un truco de Ilusión. Puedes hacer que un objeto de hasta 10 pies de tamaño emita luz brillante en un radio de 20 pies y luz tenue 20 pies adicionales durante 1 hora. La luz puede ser del color que elijas y puedes encenderla o apagarla con una acción. Requiere componentes verbales y materiales (una pelusa de pedernal y acero).\n\n¿Qué tipo de aventura deseas emprender, Gandalf?"
         }
     ]
 }

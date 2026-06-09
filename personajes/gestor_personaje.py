@@ -22,6 +22,7 @@ def cargar_personaje():
 
         return json.load(archivo)
     
+
 def guardar_personaje(personaje):
 
     with open(
@@ -72,3 +73,4 @@ def actualizar_personaje(
         "ruta": ruta,
         "valor": valor
     }
+
