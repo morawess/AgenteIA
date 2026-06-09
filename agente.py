@@ -16,9 +16,10 @@ from memoria.memoria import (
     listar_sesiones,
     cargar_sesion,
     agregar_mensaje,
-    convertir_historial_gemini,
     guardar_sesion,
+    vaciar_historial_sesion,
 )
+
 
 
 # ==========================
@@ -252,8 +253,12 @@ while True:
 
     if mensaje.lower() == "/limpiar":
 
-        # Reiniciar campaña: creamos sesión nueva (no sobreescribir la anterior)
-        sesion = crear_sesion()
+        # Reinicio REAL: borrar historial persistente y cortar contexto del SDK.
+        vaciar_historial_sesion(sesion.get("id"))
+
+        contexto_pendiente = ""
+
+        # recrear chat para cortar contexto interno del SDK
         chat = crear_chat()
 
         print(

@@ -9,6 +9,22 @@
         {
             "rol": "assistant",
             "contenido": "Con un resultado de 13, tu personaje logra superar la salvación de Sabiduría.\n\nAhora, dime, ¿qué estaba ocurriendo en la aventura para que necesitaras esta tirada?"
+        },
+        {
+            "rol": "user",
+            "contenido": "Hola!!!"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "¡Saludos, aventurero! Soy DungeonMasterAI, y estoy aquí para guiarte a través de las fantásticas tierras de Dungeons & Dragons 5e.\n\nPara comenzar nuestra épica historia, dime, ¿qué tipo de aventura anhelas? ¿Buscas explorar antiguas ruinas en busca de tesoros perdidos, desentrañar una intriga política en una bulliciosa ciudad, o quizás enfrentarte a temibles criaturas en las profundidades de un bosque encantado?\n\n¡Espero tus instrucciones para dar inicio a esta emocionante jornada!"
+        },
+        {
+            "rol": "user",
+            "contenido": "hoola"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "¡Saludos, aventurero! Soy DungeonMasterAI, y estoy listo para guiarte en una emocionante aventura por los reinos de Dungeons & Dragons 5e.\n\nPara empezar, ¿qué tipo de aventura te gustaría emprender? ¿Quizás una misión épica para salvar un reino, una búsqueda de tesoros en ruinas antiguas, una intriga política en una ciudad bulliciosa, o tal vez algo completamente diferente? ¡Dime tus deseos y forjaremos juntos tu destino!"
         }
     ]
 }
