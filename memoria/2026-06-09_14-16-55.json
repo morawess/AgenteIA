@@ -1,0 +1,50 @@
+{
+    "id": "2026-06-09_14-16-55",
+    "fecha": "2026-06-09_14-16-55",
+    "historial": [
+        {
+            "rol": "user",
+            "contenido": "Hola! que puedes decirme de mi personaje?"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "¡Claro! Aquí tienes un resumen de tu personaje, Gandalf:\n\n**Nombre:** Gandalf\n**Especie:** Humano (alternativo)\n**Clase:** Mago\n**Nivel:** 1\n**Alineamiento:** Neutral bueno\n\n**Atributos Principales:**\n*   **Inteligencia:** 17 (+3) - ¡Eres bastante inteligente!\n*   **Carisma:** 14 (+2)\n*   **Sabiduría:** 13 (+1)\n\n**Combate:**\n*   **Puntos de Golpe Actuales:** 3 de 6\n*   **Clase de Armadura (CA):** 9\n*   **Velocidad:** 0 (Parece que hay un error aquí, debería ser más alta para un mago humano).\n\n**Competencias:**\n*   Ballesta ligera, Bastón, Daga, Dardo, Herramientas de artesano, Honda, Vehículo (terrestre).\n\n**Habilidades Destacadas:**\n*   **Historia:** 5\n*   **Arcanos:** 3\n*   **Naturaleza:** 3\n*   **Religión:** 3\n*   **Investigación:** 3\n*   **Supervivencia:** 3\n*   **Trato de Animales:** 3\n\n**Hechizos Conocidos:**\n*   **Armadura de Mago:** Un hechizo de abjuración de nivel 1 que te otorga una CA base de 13 + tu modificador por Destreza si no llevas armadura.\n*   **Luz:** Un truco de ilusión que hace que un objeto emita luz brillante.\n\n**Rasgos de Personalidad:** Agradable, curioso, sabio.\n\nParece que tienes un personaje con un gran intelecto y potencial mágico. ¡Aunque tus puntos de golpe son un poco bajos en este momento y tu velocidad parece estar en cero!\n\n¿Qué tipo de aventura te gustaría emprender, Gandalf? ¿Prefieres una búsqueda épica, una intriga política en una ciudad, explorar ruinas antiguas, o tal vez algo completamente diferente?"
+        },
+        {
+            "rol": "user",
+            "contenido": "haz una tirada de salvacion de destreza"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "Has realizado una tirada de salvación de Destreza.\n\nTu tirada fue un 17, con un modificador de -1, lo que resulta en un total de **16**."
+        },
+        {
+            "rol": "user",
+            "contenido": "De que fue la última tirada de salvación que te pedí?"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "La última tirada de salvación que me pediste fue de **Destreza**."
+        },
+        {
+            "rol": "user",
+            "contenido": "recuerda esto, mi personaje busca una manzana dorada mágica"
+        },
+        {
+            "rol": "user",
+            "contenido": "qué busca mi personaje?"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "Tu personaje, Gandalf, busca una **manzana dorada mágica**."
+        },
+        {
+            "rol": "user",
+            "contenido": "Hola, que recuerdas de nuestra última conversación?"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "En nuestra última conversación, recordamos que tu personaje, Gandalf, es un mago de nivel 1 con 3 de 6 puntos de golpe y una CA de 9. Realizamos una tirada de salvación de Destreza, obteniendo un resultado de 16.\n\nLo más importante es que tu personaje, Gandalf, está buscando una **manzana dorada mágica**."
+        }
+    ]
+}

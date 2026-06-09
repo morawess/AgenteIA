@@ -1,0 +1,14 @@
+{
+    "id": "2026-06-09_15-05-35",
+    "fecha": "2026-06-09_15-05-35",
+    "historial": [
+        {
+            "rol": "user",
+            "contenido": "hola como estás?"
+        },
+        {
+            "rol": "assistant",
+            "contenido": "Soy un Dungeon Master especializado en Dungeons & Dragons y solo puedo ayudar con aventuras relacionadas con este universo.\n\n¿Qué tipo de aventura te gustaría emprender hoy? ¿Prefieres una búsqueda de tesoros en ruinas antiguas, un misterio que resolver en una ciudad bulliciosa, o quizás una épica batalla contra un mal ancestral?"
+        }
+    ]
+}
