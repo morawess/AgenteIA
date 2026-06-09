@@ -11,43 +11,49 @@ from personajes.personaje import (
 )
 
 # ==========================
-# CARGAR PERSONAJE
+# STATE (sin inyectar ficha en system prompt)
 # ==========================
 
-personaje = cargar_personaje()
+def _calcular_modificadores(personaje: dict) -> dict:
 
+    if not personaje:
+        return personaje
+
+    atributos = personaje.get("atributos", {})
+
+    personaje["modificadores"] = {
+        atributo: (valor - 10) // 2
+        for atributo, valor in atributos.items()
+    }
+
+    return personaje
+
+
+# Solo para logs de arranque (NO para el prompt del modelo)
+personaje = cargar_personaje()
+if personaje:
+    _calcular_modificadores(personaje)
+    print(
+        f"\n[INFO] Personaje cargado: {personaje.get('nombre', 'Desconocido')}"
+    )
+else:
+    print("\n[INFO] No se encontró personaje.json")
+
+
+# Importamos el prompt base, pero en este archivo el sistema puede tener una copia distinta.
+# Para evitar inconsistencias, usamos SIEMPRE el de prompts.py.
 prompt_final = SYSTEM_PROMPT
 
-if personaje:
-
-    prompt_final += "\n\n=== FICHA DEL PERSONAJE ===\n"
-
-    prompt_final += json.dumps(
-        personaje,
-        ensure_ascii=False,
-        indent=2,
-    )
-
-    print(
-        f"\n[INFO] Personaje cargado: "
-        f"{personaje.get('nombre', 'Desconocido')}"
-    )
-
-else:
-
-    print(
-        "\n[INFO] No se encontró personaje.json"
-    )
-
-
 # ==========================
+
 # TOOLS
 # ==========================
 
+
+
 def tirar_dados(expresion: str) -> dict:
-    """
-    Realiza tiradas de dados para D&D.
-    """
+
+    """Realiza tiradas de dados para D&D."""
 
     resultado = tirar_dados_func(expresion)
 
@@ -68,10 +74,7 @@ def tirar_dados(expresion: str) -> dict:
 
 
 def actualizar_personaje(ruta: str, valor: str) -> dict:
-    """
-    Actualiza cualquier valor dentro del personaje usando
-    una ruta JSON.
-    """
+    """Actualiza cualquier valor dentro del personaje usando una ruta JSON."""
 
     if isinstance(valor, str):
 
@@ -82,25 +85,62 @@ def actualizar_personaje(ruta: str, valor: str) -> dict:
             valor_procesado = valor
 
     else:
-
         valor_procesado = valor
 
     print(
-        f"\n[INFO] Actualizando personaje: "
-        f"{ruta} = {valor_procesado}"
+        f"\n[INFO] Actualizando personaje: {ruta} = {valor_procesado}"
     )
 
-    resultado = actualizar_personaje_func(
-        ruta,
-        valor_procesado,
-    )
+    resultado = actualizar_personaje_func(ruta, valor_procesado)
+
+    # Luego de actualizar, recalcular modificadores si corresponde.
+    # (Esto mantiene coherencia para futuras lecturas.)
+    personaje_actual = cargar_personaje()
+    if personaje_actual:
+        # Calculamos modificadores para coherencia de lectura futura.
+        _calcular_modificadores(personaje_actual)
+
+        # Persistimos cada modificador recalculado.
+        modificadores = personaje_actual.get("modificadores", {})
+        for atributo, mod in modificadores.items():
+            actualizar_personaje_func(f"modificadores.{atributo}", mod)
 
     return resultado
+
+
+
+def leer_personaje(ruta: str | None = None) -> dict:
+    """Devuelve la ficha actual del personaje.
+
+    - Si `ruta` es None: retorna la ficha completa.
+    - Si `ruta` tiene notación con puntos (ej: "atributos.fuerza"), retorna el valor.
+    """
+
+    personaje_actual = cargar_personaje()
+
+    if personaje_actual is None:
+        return {"error": "No existe personaje.json"}
+
+    personaje_actual = _calcular_modificadores(personaje_actual)
+
+    if not ruta:
+        return personaje_actual
+
+    claves = ruta.split(".")
+    actual = personaje_actual
+
+    for clave in claves:
+        if not isinstance(actual, dict) or clave not in actual:
+            return {"error": f"Ruta inválida: {ruta}"}
+        actual = actual[clave]
+
+    return {"ruta": ruta, "valor": actual}
 
 
 # ==========================
 # CREAR CHAT
 # ==========================
+
 
 def crear_chat():
 
@@ -111,6 +151,7 @@ def crear_chat():
             tools=[
                 tirar_dados,
                 actualizar_personaje,
+                leer_personaje,
             ],
         ),
     )
@@ -121,6 +162,7 @@ chat = crear_chat()
 print("=== DungeonMasterGPT ===")
 print("Escribe '/salir' para terminar.")
 print("Escribe '/limpiar' para reiniciar la campaña.\n")
+
 
 # ==========================
 # LOOP PRINCIPAL
@@ -164,15 +206,25 @@ while True:
 
         print("\nDM:")
 
-        if hasattr(respuesta, "text") and respuesta.text:
+        texto = []
 
-            print(respuesta.text)
+        if hasattr(respuesta, "candidates"):
+
+            for candidate in respuesta.candidates:
+
+                if hasattr(candidate, "content"):
+
+                    for part in candidate.content.parts:
+
+                        if hasattr(part, "text") and part.text:
+
+                            texto.append(part.text)
+
+        if texto:
+            print("".join(texto))
 
         else:
-
-            print(
-                "(El Dungeon Master no generó una respuesta textual.)"
-            )
+            print("(El Dungeon Master no generó una respuesta textual.)")
 
         print()
 
@@ -185,10 +237,7 @@ while True:
             print("\nERROR DE CUOTA:")
             print(e)
 
-        elif (
-            "deadline" in error
-            or "timeout" in error
-        ):
+        elif ("deadline" in error or "timeout" in error):
 
             print(
                 "\nLa solicitud tardó demasiado. "
@@ -203,7 +252,5 @@ while True:
             )
 
         else:
+            print(f"\nError inesperado: {e}\n")
 
-            print(
-                f"\nError inesperado: {e}\n"
-            )

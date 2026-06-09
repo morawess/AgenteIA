@@ -7,15 +7,15 @@
     "especie": "Humano (alternativo)",
     "alineamiento": "Neutral bueno",
     "atributos": {
-        "fuerza": 0,
+        "fuerza": 10,
         "destreza": 8,
-        "constitucion": 0,
+        "constitucion": 10,
         "inteligencia": 17,
         "sabiduria": 13,
         "carisma": 14
     },
     "combate": {
-        "ca": 13,
+        "ca": 9,
         "velocidad": 0,
         "hp_max": 6,
         "hp_actual": 3
@@ -50,5 +50,17 @@
     "rasgos_personalidad": "Agradable, curioso, sabio",
     "ideales": "",
     "vinculos": "",
-    "historia": ""
+    "historia": "",
+    "hechizos_conocidos": {
+        "Luz": "Truco de Ilusión. Alcance: 30 pies. Componentes: V, M (una pelusa de pedernal y acero). Duración: 1 hora. Toca un objeto que no sea más grande de 10 pies en cualquier dimensión. Hasta que el hechizo termine, el objeto emite luz brillante en un radio de 20 pies y luz tenue 20 pies adicionales. La luz es de color a tu elección. Si apagas el objeto, la luz también se apaga. Puedes usar una acción para tocar el objeto de nuevo y apagar la luz, o para encenderla.",
+        "Armadura de Mago": "Hechizo de Abjuración de nivel 1. Alcance: Tocar. Componentes: V, S, M (un trozo de cuero curado). Duración: 8 horas. Toca a una criatura voluntaria que no lleve armadura, y una fuerza mágica protectora la rodea hasta que el hechizo termina. El objetivo tiene una CA base de 13 + su modificador por Destreza. El hechizo termina si el objetivo se pone armadura o si lanzas este hechizo de nuevo."
+    },
+    "modificadores": {
+        "fuerza": 0,
+        "destreza": -1,
+        "constitucion": 0,
+        "inteligencia": 3,
+        "sabiduria": 1,
+        "carisma": 2
+    }
 }
