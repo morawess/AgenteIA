@@ -1,143 +1,201 @@
 import json
 
-import google.generativeai as genai
-import google.api_core.exceptions
+from google import genai
 
-from config import API_KEY
+from config import client
 from prompts import SYSTEM_PROMPT
-from dados import tirar_dados
-from personajes.personaje import cargar_personaje
-
-
-# Configurar Gemini
-genai.configure(api_key=API_KEY)
-
-
-# ==========================
-# CARGAR PERSONAJE
-# ==========================
-
-personaje = cargar_personaje()
-
+from dados import tirar_dados as tirar_dados_func
 from personajes.personaje import (
     cargar_personaje,
-    actualizar_personaje
+    actualizar_personaje as actualizar_personaje_func,
 )
 
-prompt_final = SYSTEM_PROMPT
+# ==========================
+# STATE (sin inyectar ficha en system prompt)
+# ==========================
 
+def _calcular_modificadores(personaje: dict) -> dict:
+
+    if not personaje:
+        return personaje
+
+    atributos = personaje.get("atributos", {})
+
+    personaje["modificadores"] = {
+        atributo: (valor - 10) // 2
+        for atributo, valor in atributos.items()
+    }
+
+    return personaje
+
+
+# Solo para logs de arranque (NO para el prompt del modelo)
+personaje = cargar_personaje()
 if personaje:
-
-    prompt_final += "\n\n=== FICHA DEL PERSONAJE ===\n"
-
-    prompt_final += json.dumps(
-        personaje,
-        ensure_ascii=False,
-        indent=2
-    )
-
+    _calcular_modificadores(personaje)
     print(
         f"\n[INFO] Personaje cargado: {personaje.get('nombre', 'Desconocido')}"
     )
-
 else:
+    print("\n[INFO] No se encontró personaje.json")
+
+
+# Importamos el prompt base, pero en este archivo el sistema puede tener una copia distinta.
+# Para evitar inconsistencias, usamos SIEMPRE el de prompts.py.
+prompt_final = SYSTEM_PROMPT
+
+# ==========================
+
+# TOOLS
+# ==========================
+
+
+
+def tirar_dados(expresion: str) -> dict:
+
+    """Realiza tiradas de dados para D&D."""
+
+    resultado = tirar_dados_func(expresion)
+
+    if "error" not in resultado:
+
+        print("\n=== TIRADA DE DADOS ===")
+
+        print(
+            f"{resultado['dados']} → "
+            f"{resultado['tiradas']} "
+            f"(Mod: {resultado['modificador']:+}) "
+            f"= {resultado['total']}"
+        )
+
+        print()
+
+    return resultado
+
+
+def actualizar_personaje(ruta: str, valor: str) -> dict:
+    """Actualiza cualquier valor dentro del personaje usando una ruta JSON."""
+
+    if isinstance(valor, str):
+
+        try:
+            valor_procesado = json.loads(valor)
+
+        except json.JSONDecodeError:
+            valor_procesado = valor
+
+    else:
+        valor_procesado = valor
 
     print(
-        "\n[INFO] No se encontró personaje.json"
+        f"\n[INFO] Actualizando personaje: {ruta} = {valor_procesado}"
     )
-    print(personaje)
+
+    resultado = actualizar_personaje_func(ruta, valor_procesado)
+
+    # Luego de actualizar, recalcular modificadores si corresponde.
+    # (Esto mantiene coherencia para futuras lecturas.)
+    personaje_actual = cargar_personaje()
+    if personaje_actual:
+        # Calculamos modificadores para coherencia de lectura futura.
+        _calcular_modificadores(personaje_actual)
+
+        # Persistimos cada modificador recalculado.
+        modificadores = personaje_actual.get("modificadores", {})
+        for atributo, mod in modificadores.items():
+            actualizar_personaje_func(f"modificadores.{atributo}", mod)
+
+    return resultado
 
 
-# Declaración de herramientas
-herramientas = [
-    {
-        "function_declarations": [
-            {
-                "name": "tirar_dados",
-                "description": (
-                    "Realiza tiradas de dados para Dungeons & Dragons. "
-                    "Acepta expresiones como 1d20, 1d20+5 o 2d6."
-                ),
-                "parameters": {
-                    "type": "OBJECT",
-                    "properties": {
-                        "expresion": {
-                            "type": "STRING",
-                            "description": "Expresión de dados en formato XdY+Z",
-                        }
-                    },
-                    "required": ["expresion"],
-                },
-            },
 
-            {
-                "name": "actualizar_personaje",
-                "description": (
-                    "Actualiza cualquier valor dentro del personaje usando una ruta JSON."
-                ),
-                "parameters": {
-                    "type": "OBJECT",
-                    "properties": {
+def leer_personaje(ruta: str | None = None) -> dict:
+    """Devuelve la ficha actual del personaje.
 
-                        "ruta": {
-                            "type": "STRING",
-                            "description": (
-                                "Ruta del campo. Ejemplo: "
-                                "nivel, atributos.fuerza, combate.hp_actual"
-                            )
-                        },
+    - Si `ruta` es None: retorna la ficha completa.
+    - Si `ruta` tiene notación con puntos (ej: "atributos.fuerza"), retorna el valor.
+    """
 
-                        "valor": {
-                            "type": "STRING",
-                            "description": (
-                                "Nuevo valor para almacenar"
-                            )
-                        }
+    personaje_actual = cargar_personaje()
 
-                    },
-                    "required": [
-                        "ruta",
-                        "valor"
-                    ]
-                }
-            }
-        ]
-    }
-]
+    if personaje_actual is None:
+        return {"error": "No existe personaje.json"}
+
+    personaje_actual = _calcular_modificadores(personaje_actual)
+
+    if not ruta:
+        return personaje_actual
+
+    claves = ruta.split(".")
+    actual = personaje_actual
+
+    for clave in claves:
+        if not isinstance(actual, dict) or clave not in actual:
+            return {"error": f"Ruta inválida: {ruta}"}
+        actual = actual[clave]
+
+    return {"ruta": ruta, "valor": actual}
 
 
-modelo = genai.GenerativeModel(
-    model_name="gemini-2.5-flash",
-    system_instruction=prompt_final,
-    tools=herramientas,
-)
+# ==========================
+# CREAR CHAT
+# ==========================
 
-chat = modelo.start_chat()
+
+def crear_chat():
+
+    return client.chats.create(
+        model="gemini-2.5-flash",
+        config=genai.types.GenerateContentConfig(
+            system_instruction=prompt_final,
+            tools=[
+                tirar_dados,
+                actualizar_personaje,
+                leer_personaje,
+            ],
+        ),
+    )
+
+
+chat = crear_chat()
 
 print("=== DungeonMasterGPT ===")
 print("Escribe '/salir' para terminar.")
 print("Escribe '/limpiar' para reiniciar la campaña.\n")
 
+
+# ==========================
+# LOOP PRINCIPAL
+# ==========================
+
 while True:
 
     mensaje = input("Jugador: ")
 
+    # ----------------------
     # Salir
+    # ----------------------
+
     if mensaje.lower() == "/salir":
 
         print(
-            "\nDungeon Master: Que los dados estén siempre a tu favor, aventurero."
+            "\nDungeon Master: "
+            "Que los dados estén siempre a tu favor, aventurero."
         )
 
         break
 
-    # Reiniciar conversación
+    # ----------------------
+    # Limpiar
+    # ----------------------
+
     if mensaje.lower() == "/limpiar":
 
-        chat = modelo.start_chat()
+        chat = crear_chat()
 
         print(
-            "\nDungeon Master: La campaña ha sido reiniciada.\n"
+            "\nDungeon Master: "
+            "La campaña ha sido reiniciada.\n"
         )
 
         continue
@@ -146,169 +204,53 @@ while True:
 
         respuesta = chat.send_message(mensaje)
 
-        MAX_FUNCTION_CALLS = 5
-
-        contador = 0
-
-        while True:
-
-            contador += 1
-
-            if contador > MAX_FUNCTION_CALLS:
-
-                print(
-                    "\nError: demasiadas llamadas consecutivas a funciones.\n"
-                )
-
-                break
-
-            function_call = None
-
-            if (
-                respuesta.candidates
-                and respuesta.candidates[0].content
-                and respuesta.candidates[0].content.parts
-            ):
-
-                for part in respuesta.candidates[0].content.parts:
-
-                    if (
-                        hasattr(part, "function_call")
-                        and part.function_call
-                    ):
-
-                        function_call = part.function_call
-
-                        break
-
-            if function_call is None:
-                break
-
-            if function_call.name == "tirar_dados":
-
-                expresion = function_call.args.get(
-                    "expresion"
-                )
-
-                resultado = tirar_dados(
-                    expresion
-                )
-
-                if "error" in resultado:
-
-                    print(
-                        f"\nError en la tirada: {resultado['error']}\n"
-                    )
-
-                    break
-
-                print("\n=== TIRADA DE DADOS ===")
-
-                print(
-                    f"{resultado['dados']} → "
-                    f"{resultado['tiradas']} "
-                    f"(Mod: {resultado['modificador']:+}) "
-                    f"= {resultado['total']}"
-                )
-
-                respuesta = chat.send_message(
-                    {
-                        "function_response": {
-                            "name": "tirar_dados",
-                            "response": resultado,
-                        }
-                    }
-                )
-
-            elif function_call.name == "actualizar_personaje":
-                ruta = function_call.args.get(
-                    "ruta"
-                )
-
-                valor = function_call.args.get(
-                    "valor"
-                )
-
-                try:
-
-                    valor = json.loads(valor)
-
-                except:
-
-                    pass
-
-                resultado = actualizar_personaje(
-                    ruta,
-                    valor
-                )
-
-                if "error" in resultado:
-
-                    print(
-                        f"\nError al actualizar personaje: {resultado['error']}\n"
-                    )
-
-                    break
-
-                print(
-                    f"\n[INFO] Personaje actualizado: {ruta} = {valor}\n"
-                )
-
-                respuesta = chat.send_message(
-                    {
-                        "function_response": {
-                            "name": "actualizar_personaje",
-                            "response": resultado,
-                        }
-                    }
-                )
-
         print("\nDM:")
 
-        textos = []
+        texto = []
 
-        if (
-            respuesta.candidates
-            and respuesta.candidates[0].content
-            and respuesta.candidates[0].content.parts
-        ):
+        if hasattr(respuesta, "candidates"):
 
-            for part in respuesta.candidates[0].content.parts:
+            for candidate in respuesta.candidates:
 
-                if hasattr(part, "text") and part.text:
+                if hasattr(candidate, "content"):
 
-                    textos.append(part.text)
+                    for part in candidate.content.parts:
 
-        if textos:
+                        if hasattr(part, "text") and part.text:
 
-            print(
-                "\n".join(textos)
-            )
+                            texto.append(part.text)
+
+        if texto:
+            print("".join(texto))
 
         else:
-
-            print(
-                "(El Dungeon Master no generó una respuesta textual.)"
-            )
+            print("(El Dungeon Master no generó una respuesta textual.)")
 
         print()
-
-    except google.api_core.exceptions.ResourceExhausted as e:
-
-        print("\nERROR DE CUOTA:")
-
-        print(e)
-
-        print()
-
-    except google.api_core.exceptions.DeadlineExceeded:
-
-        print(
-            "\nLa solicitud tardó demasiado. Intenta nuevamente.\n"
-        )
 
     except Exception as e:
 
-        print(
-            f"\nError inesperado: {e}\n"
-        )
+        error = str(e).lower()
+
+        if "quota" in error or "429" in error:
+
+            print("\nERROR DE CUOTA:")
+            print(e)
+
+        elif ("deadline" in error or "timeout" in error):
+
+            print(
+                "\nLa solicitud tardó demasiado. "
+                "Intenta nuevamente.\n"
+            )
+
+        elif "503" in error or "unavailable" in error:
+
+            print(
+                "\nGemini está saturado temporalmente. "
+                "Intenta nuevamente en unos segundos.\n"
+            )
+
+        else:
+            print(f"\nError inesperado: {e}\n")
+
