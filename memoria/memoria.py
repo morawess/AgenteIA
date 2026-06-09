@@ -3,7 +3,9 @@ import os
 from datetime import datetime
 
 CARPETA_MEMORIA = "memoria"
-#TO DO: agregar función para que el agente guarde memoria
+# El guardado/persistencia lo maneja guardar_sesion().
+# Este módulo actúa como gestor de sesiones (un solo JSON por sesión).
+
 
 def inicializar_memoria():
     os.makedirs(CARPETA_MEMORIA, exist_ok=True)

@@ -10,6 +10,17 @@ from personajes.personaje import (
     actualizar_personaje as actualizar_personaje_func,
 )
 
+from memoria.memoria import (
+    inicializar_memoria,
+    crear_sesion,
+    listar_sesiones,
+    cargar_sesion,
+    agregar_mensaje,
+    convertir_historial_gemini,
+    guardar_sesion,
+)
+
+
 # ==========================
 # STATE (sin inyectar ficha en system prompt)
 # ==========================
@@ -45,10 +56,8 @@ else:
 prompt_final = SYSTEM_PROMPT
 
 # ==========================
-
 # TOOLS
 # ==========================
-
 
 
 def tirar_dados(expresion: str) -> dict:
@@ -108,7 +117,6 @@ def actualizar_personaje(ruta: str, valor: str) -> dict:
     return resultado
 
 
-
 def leer_personaje(ruta: str | None = None) -> dict:
     """Devuelve la ficha actual del personaje.
 
@@ -138,7 +146,7 @@ def leer_personaje(ruta: str | None = None) -> dict:
 
 
 # ==========================
-# CREAR CHAT
+# CREAR CHAT (con memoria de sesión)
 # ==========================
 
 
@@ -157,11 +165,63 @@ def crear_chat():
     )
 
 
-chat = crear_chat()
+def obtener_respuesta_textual(respuesta) -> str:
+    """Extrae el texto final (si existe) desde la respuesta del SDK."""
+
+    texto = []
+
+    if hasattr(respuesta, "candidates"):
+        for candidate in respuesta.candidates:
+            if hasattr(candidate, "content"):
+                for part in candidate.content.parts:
+                    if hasattr(part, "text") and part.text:
+                        texto.append(part.text)
+
+    return "".join(texto).strip()
+
+
+# ==========================
+# INICIO + SESIÓN
+# ==========================
+
+inicializar_memoria()
 
 print("=== DungeonMasterGPT ===")
 print("Escribe '/salir' para terminar.")
 print("Escribe '/limpiar' para reiniciar la campaña.\n")
+
+print("Sesiones disponibles (memoria persistente):")
+
+sesiones = listar_sesiones()
+if sesiones:
+    for s in sesiones[:10]:
+        print(f"- {s}")
+else:
+    print("(No hay sesiones guardadas aún)")
+
+seleccion = input(
+    "\nIngresá el ID de una sesión para continuar (o dejá vacío para crear una nueva): "
+).strip()
+
+if seleccion:
+    sesion = cargar_sesion(seleccion)
+    print(f"\n[INFO] Cargando sesión: {seleccion}\n")
+else:
+    sesion = crear_sesion()
+    print(f"\n[INFO] Creando sesión nueva: {sesion['id']}\n")
+
+chat = crear_chat()
+
+# Contexto pendiente: para que el modelo recuerde lo que ya se dijo
+# (workaround sin re-ejecutar tools por cada mensaje previo).
+contexto_pendiente = ""
+for m in sesion.get("historial", []):
+    if m.get("rol") == "user":
+        contexto_pendiente += f"Jugador: {m.get('contenido', '').strip()}\n"
+    elif m.get("rol") == "assistant":
+        contexto_pendiente += f"DM: {m.get('contenido', '').strip()}\n"
+
+contexto_pendiente = contexto_pendiente.strip()
 
 
 # ==========================
@@ -183,6 +243,7 @@ while True:
             "Que los dados estén siempre a tu favor, aventurero."
         )
 
+        guardar_sesion(sesion)
         break
 
     # ----------------------
@@ -191,6 +252,8 @@ while True:
 
     if mensaje.lower() == "/limpiar":
 
+        # Reiniciar campaña: creamos sesión nueva (no sobreescribir la anterior)
+        sesion = crear_sesion()
         chat = crear_chat()
 
         print(
@@ -200,33 +263,38 @@ while True:
 
         continue
 
+    # Guardar mensaje del usuario
+    agregar_mensaje(sesion, "user", mensaje)
+    guardar_sesion(sesion)
+
     try:
 
-        respuesta = chat.send_message(mensaje)
+        # Si cargamos una sesión previa, inyectamos el contexto anterior SOLO una vez.
+        mensaje_a_enviar = mensaje
+        if contexto_pendiente:
+            mensaje_a_enviar = (
+                f"Contexto de la sesión anterior:\n{contexto_pendiente}\n\n"
+                f"Ahora el jugador dice: {mensaje}"
+            )
+            contexto_pendiente = ""
+
+        respuesta = chat.send_message(mensaje_a_enviar)
+
+
+        texto = obtener_respuesta_textual(respuesta)
 
         print("\nDM:")
 
-        texto = []
-
-        if hasattr(respuesta, "candidates"):
-
-            for candidate in respuesta.candidates:
-
-                if hasattr(candidate, "content"):
-
-                    for part in candidate.content.parts:
-
-                        if hasattr(part, "text") and part.text:
-
-                            texto.append(part.text)
-
         if texto:
-            print("".join(texto))
-
+            print(texto)
         else:
             print("(El Dungeon Master no generó una respuesta textual.)")
 
         print()
+
+        # Guardar respuesta del asistente
+        agregar_mensaje(sesion, "assistant", texto if texto else "")
+        guardar_sesion(sesion)
 
     except Exception as e:
 
