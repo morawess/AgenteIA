@@ -84,6 +84,18 @@ def vaciar_historial_sesion(id_sesion: str) -> bool:
         return False
 
 
+def borrar_memoria_interna_chat(sesion: dict) -> None:
+    """Sincroniza el objeto en memoria (sesion) con el historial vacío.
+
+    Importante: en el loop principal, /limpiar opera sobre el objeto `sesion`
+    que ya está cargado en RAM. Si solo escribimos al JSON pero no vaciamos
+    `sesion['historial']`, al guardar después volverá a reaparecer lo viejo.
+    """
+    if isinstance(sesion, dict) and "historial" in sesion:
+        sesion["historial"] = []
+
+
+
 def listar_sesiones():
 
     inicializar_memoria()

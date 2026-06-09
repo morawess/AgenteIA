@@ -253,10 +253,12 @@ while True:
 
     if mensaje.lower() == "/limpiar":
 
-        # Reinicio REAL: borrar historial persistente y cortar contexto del SDK.
+        # Reinicio REAL: borrar historial persistente y también sincronizar el objeto en RAM.
         vaciar_historial_sesion(sesion.get("id"))
+        sesion["historial"] = []
 
         contexto_pendiente = ""
+
 
         # recrear chat para cortar contexto interno del SDK
         chat = crear_chat()
