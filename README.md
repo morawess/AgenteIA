@@ -1,40 +1,46 @@
-# AgenteIA
+# Dungeon Master AI (Dungeon Master con Gemini)
 
-Agente de Dungeon Master para una aventura interactiva con Gemini.
+DMAI es un **Dungeon Master** para **Dungeons & Dragons 5e**. El programa mantiene una **conversación interactiva** con un jugador, utilizando Gemini para generar narración y decisiones de la aventura.
+
+## ¿Qué hace el agente?
+- Lee y mantiene una **ficha persistente del personaje** (guardada en `personajes/personaje.json`).
+- Maneja una **memoria persistente de sesiones**: podés continuar campañas guardadas.
+- Provee **tools específicas** para que Gemini:
+  - Realice tiradas de dados de D&D.
+  - Lea valores actuales del personaje.
+  - Actualice la ficha cuando ocurran cambios permanentes.
 
 ## Requisitos
+- Tener una API key de **Gemini**.
+- Python instalado.
 
-- Python 3.10 o superior.
-- `pip` instalado.
-- Clave de API de Gemini en la variable de entorno `GEMINI_API_KEY`.
+## Configuración (API key)
+1. Copiar `.env.example` a `.env`.
+2. En `.env` guardar la key para Gemini (variable `GEMINI_API_KEY`).
 
-## Instalación
+> Ejemplo (según tu `.env.example`):
+> - `GEMINI_API_KEY=tu_api_key_aqui`
 
-```powershell
-python -m venv .venv
-.\.venv\Scripts\activate
+## Instalación de dependencias
+Instalar dependencias con:
+
+```bash
 pip install -r requirements.txt
 ```
 
-## Configuración
-
-1. Copia `.env.example` a `.env`:
-
-```powershell
-copy .env.example .env
-```
-
-2. Abre `.env` y reemplaza `tu_api_key_aqui` con tu clave real de Gemini.
-
 ## Ejecución
+1. Asegurate de tener tu `.env` configurado.
+2. Ejecutar el programa con:
 
-```powershell
+```bash
 python agente.py
 ```
 
-## Notas
+El programa te muestra las sesiones disponibles y permite al usuario:
+- Elegir una sesión existente, o crear una nueva.
+- Usar comandos:
+  - `/limpiar`: reinicia la campaña (vacía el historial de la sesión).
+  - `/salir`: termina la ejecución.
 
-- El archivo `.env` está incluido en `.gitignore` para que no se suba al repositorio.
-- Si un compañero clona este repo, debe instalar las dependencias y crear su propio `.env`.
-- El paquete `google-generativeai` está en desuso; para futuras actualizaciones, considera migrar a `google-genai`.
+
 
