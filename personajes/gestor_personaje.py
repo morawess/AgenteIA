@@ -1,3 +1,5 @@
+#lógica para cargar el personaje desde un archivo JSON, actualizar sus atributos y guardar los cambios. 
+
 import os
 import json
 

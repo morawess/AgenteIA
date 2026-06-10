@@ -1,3 +1,5 @@
+#acá se onfigura la carga de la clave API de Google Generative AI desde un archivo .env y se inicia el cliente de la API
+
 import os
 from dotenv import load_dotenv
 from google import genai

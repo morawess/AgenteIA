@@ -1,3 +1,6 @@
+#lógica para cargar el personaje desde un archivo JSON, calcular modificadores de atributos y realizar tiradas de dados según las reglas.
+#la función principal es `tirar_dados`, que soporta tanto tiradas estándar (como "2d6+3") como tiradas de salvación basadas en los atributos del personaje (como "salvacion.fuerza").
+
 import json
 import os
 import random
@@ -60,7 +63,7 @@ def tirar_dados(expresion: str):
             "atributo": atributo,
         }
 
-    # --- Caso 2: expresión estándar NdM(+/-)X ---
+    # Caso 2: expresión estándar NdM(+/-)X
     patron = r"(\d+)d(\d+)([+-]\d+)?"
     match = re.match(patron, expresion)
 

@@ -1,6 +1,7 @@
+#este archivo extrae información del PDF 'gandalf-nivel-1'. contiene los datos del personaje y los guarda en personajes.json. 
 import json
 import re
-from pypdf import PdfReader
+from pypdf import PdfReader # librería que lee el contenido del PDF
 
 
 def extraer_texto_pdf(ruta_pdf):

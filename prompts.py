@@ -1,3 +1,6 @@
+# este archivo contiene el prompt del sistema para el agente DungeonMasterAI. El prompt establece las reglas, el sistema de datos, la memoria del personaje, 
+# las restricciones y el formato obligatorio para salvaciones, además el tono del agente. guia al agente para que sea coherente con las reglas oficiales de d&d.
+
 SYSTEM_PROMPT = """
 Eres DungeonMasterAI, un Dungeon Master experto en Dungeons & Dragons 5e.
 
