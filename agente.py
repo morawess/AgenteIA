@@ -1,7 +1,7 @@
+#IMPORTS
+
 import json
-
 from google import genai
-
 from config import client
 from prompts import SYSTEM_PROMPT
 from dados import tirar_dados as tirar_dados_func
@@ -18,14 +18,10 @@ from memoria.gestor_memoria import (
     agregar_mensaje,
     guardar_sesion,
     vaciar_historial_sesion,
-)
+) 
 
 
-
-
-# ==========================
-# STATE (sin inyectar ficha en system prompt)
-# ==========================
+# ESTADO DEL PERSONAJE EN MEMORIA (con cálculos de modificadores)
 
 def _calcular_modificadores(personaje: dict) -> dict:
 
@@ -42,7 +38,7 @@ def _calcular_modificadores(personaje: dict) -> dict:
     return personaje
 
 
-# Solo para logs de arranque (NO para el prompt del modelo)
+# Solo para logs de arranque
 personaje = cargar_personaje()
 if personaje:
     _calcular_modificadores(personaje)
@@ -53,18 +49,15 @@ else:
     print("\n[INFO] No se encontró personaje.json")
 
 
-# Importamos el prompt base, pero en este archivo el sistema puede tener una copia distinta.
-# Para evitar inconsistencias, usamos SIEMPRE el de prompts.py.
+# Import del prompt system
 prompt_final = SYSTEM_PROMPT
 
-# ==========================
-# TOOLS
-# ==========================
 
+# TOOLS
 
 def tirar_dados(expresion: str) -> dict:
 
-    """Realiza tiradas de dados para D&D."""
+    """Realiza tiradas de dados para DnD.""" #NO borrar, el SDK usa estos docstrings
 
     resultado = tirar_dados_func(expresion)
 
@@ -147,10 +140,7 @@ def leer_personaje(ruta: str | None = None) -> dict:
     return {"ruta": ruta, "valor": actual}
 
 
-# ==========================
-# CREAR CHAT (con memoria de sesión)
-# ==========================
-
+# CREA CHAT + tools
 
 def crear_chat():
 
@@ -166,12 +156,13 @@ def crear_chat():
         ),
     )
 
-
+#extractor de texto para respuestas del SDK
 def obtener_respuesta_textual(respuesta) -> str:
     """Extrae el texto final (si existe) desde la respuesta del SDK."""
 
     texto = []
-
+    
+    #evita que explote con un AttributeError
     if hasattr(respuesta, "candidates"):
         for candidate in respuesta.candidates:
             if hasattr(candidate, "content"):
@@ -182,9 +173,7 @@ def obtener_respuesta_textual(respuesta) -> str:
     return "".join(texto).strip()
 
 
-# ==========================
-# INICIO + SESIÓN
-# ==========================
+# INICIO + SESIONES
 
 inicializar_memoria()
 
@@ -192,14 +181,14 @@ print("=== DungeonMasterGPT ===")
 print("Escribe '/salir' para terminar.")
 print("Escribe '/limpiar' para reiniciar la campaña.\n")
 
-print("Sesiones disponibles (memoria persistente):")
+print("Sesiones disponibles:")
 
 sesiones = listar_sesiones()
 if sesiones:
     for s in sesiones[:10]:
         print(f"- {s}")
 else:
-    print("(No hay sesiones guardadas aún)")
+    print("(No hay sesiones guardadas aún)") 
 
 seleccion = input(
     "\nIngresá el ID de una sesión para continuar (o dejá vacío para crear una nueva): "
@@ -215,7 +204,7 @@ else:
 chat = crear_chat()
 
 # Contexto pendiente: para que el modelo recuerde lo que ya se dijo
-# (workaround sin re-ejecutar tools por cada mensaje previo).
+# (sin re-ejecutar tools por cada mensaje previo).
 contexto_pendiente = ""
 for m in sesion.get("historial", []):
     if m.get("rol") == "user":
@@ -226,17 +215,12 @@ for m in sesion.get("historial", []):
 contexto_pendiente = contexto_pendiente.strip()
 
 
-# ==========================
 # LOOP PRINCIPAL
-# ==========================
 
 while True:
 
     mensaje = input("Jugador: ")
 
-    # ----------------------
-    # Salir
-    # ----------------------
 
     if mensaje.lower() == "/salir":
 
@@ -248,9 +232,6 @@ while True:
         guardar_sesion(sesion)
         break
 
-    # ----------------------
-    # Limpiar
-    # ----------------------
 
     if mensaje.lower() == "/limpiar":
 
@@ -304,6 +285,7 @@ while True:
         agregar_mensaje(sesion, "assistant", texto if texto else "")
         guardar_sesion(sesion)
 
+    #manejo de errores
     except Exception as e:
 
         error = str(e).lower()
