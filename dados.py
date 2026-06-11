@@ -32,7 +32,7 @@ def tirar_dados(expresion: str):
 
     expresion = expresion.strip().lower()
 
-    # --- expresión para salvaciones ---
+    #expresión para salvaciones
     if expresion.startswith("salvacion."):
         atributo = expresion.split(".", 1)[1]
         personaje = _cargar_personaje()
@@ -57,7 +57,7 @@ def tirar_dados(expresion: str):
             "atributo": atributo,
         }
 
-    # --- expresión estándar NdM+/-X ---
+    #expresión estándar NdM+/-X
     patron = r"(\d+)d(\d+)([+-]\d+)?"
     match = re.match(patron, expresion)
 
