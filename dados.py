@@ -18,9 +18,6 @@ def _calc_mod(valor_atributo: int) -> int:
     return (valor_atributo - 10) // 2
 
 
-# (helper opcional)
-
-
 def tirar_dados(expresion: str):
     """Realiza tiradas de dados para D&D.
 
@@ -35,7 +32,7 @@ def tirar_dados(expresion: str):
 
     expresion = expresion.strip().lower()
 
-    # --- Caso 1: salvaciones ---
+    # --- expresión para salvaciones ---
     if expresion.startswith("salvacion."):
         atributo = expresion.split(".", 1)[1]
         personaje = _cargar_personaje()
@@ -50,7 +47,7 @@ def tirar_dados(expresion: str):
         roll = random.randint(1, 20)
         total = roll + mod
 
-        # Devolvemos un formato consistente con el resto del sistema
+        #devuelve en el formato esperado todos los datos relevantes para la salvación.
         return {
             "dados": f"1d20{mod:+d}",
             "tiradas": [roll],
@@ -60,7 +57,7 @@ def tirar_dados(expresion: str):
             "atributo": atributo,
         }
 
-    # --- Caso 2: expresión estándar NdM(+/-)X ---
+    # --- expresión estándar NdM+/-X ---
     patron = r"(\d+)d(\d+)([+-]\d+)?"
     match = re.match(patron, expresion)
 
@@ -74,6 +71,7 @@ def tirar_dados(expresion: str):
     resultados = [random.randint(1, caras) for _ in range(cantidad)]
     total = sum(resultados) + modificador
 
+    #devuelve los datos relevantes de la tirada estándar.
     return {
         "dados": expresion,
         "tiradas": resultados,
